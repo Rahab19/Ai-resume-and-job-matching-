@@ -1,0 +1,96 @@
+
+{% extends "base.html" %}
+
+{% block title %}Dashboard - CareerLink{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold mb-4">Welcome back, {{ session.username }}!</h1>
+    <div class="bg-blue-100 p-4 rounded-lg">
+        <p class="text-blue-800">Your AI-powered career assistant is ready to help you find your next opportunity.</p>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <i class="fas fa-briefcase text-3xl text-blue-600 mb-2"></i>
+        <h3 class="text-lg font-semibold">Job Matches</h3>
+        <p class="text-2xl font-bold text-blue-600">{{ job_matches|length }}</p>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <i class="fas fa-graduation-cap text-3xl text-green-600 mb-2"></i>
+        <h3 class="text-lg font-semibold">Skills</h3>
+        <p class="text-2xl font-bold text-green-600">{{ session.user_skills.split(',')|length if session.user_skills else 0 }}</p>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <i class="fas fa-chart-line text-3xl text-purple-600 mb-2"></i>
+        <h3 class="text-lg font-semibold">Experience</h3>
+        <p class="text-lg font-bold text-purple-600">{{ session.user_experience or 'Not Set' }}</p>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <i class="fas fa-map-marker-alt text-3xl text-orange-600 mb-2"></i>
+        <h3 class="text-lg font-semibold">Location</h3>
+        <p class="text-lg font-bold text-orange-600">{{ session.user_location or 'Any' }}</p>
+    </div>
+</div>
+
+<!-- Top Job Matches -->
+<div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold">Top Job Matches</h2>
+        <a href="{{ url_for('job_matches') }}" class="text-blue-600 hover:underline">View All</a>
+    </div>
+    
+    {% if job_matches %}
+        <div class="space-y-4">
+            {% for job in job_matches %}
+            <div class="border-l-4 border-blue-500 pl-4 py-2">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="font-semibold text-lg">{{ job.title }}</h3>
+                        <p class="text-gray-600">{{ job.company }}</p>
+                        <p class="text-sm text-gray-500">{{ job.location }} • {{ job.salary_range }}</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
+                            {{ "%.1f"|format(job.match_score * 100) }}% match
+                        </span>
+                    </div>
+                </div>
+                <p class="text-gray-700 mt-2">{{ job.description[:150] }}...</p>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-gray-500">Update your skills to get personalized job recommendations!</p>
+    {% endif %}
+</div>
+
+<!-- Quick Actions -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <a href="{{ url_for('job_matches') }}" class="bg-blue-600 text-white p-6 rounded-lg hover:bg-blue-700 transition text-center">
+        <i class="fas fa-search text-3xl mb-2"></i>
+        <h3 class="font-semibold">Find Jobs</h3>
+        <p class="text-sm opacity-90">Discover opportunities</p>
+    </a>
+    
+    <a href="{{ url_for('courses') }}" class="bg-green-600 text-white p-6 rounded-lg hover:bg-green-700 transition text-center">
+        <i class="fas fa-graduation-cap text-3xl mb-2"></i>
+        <h3 class="font-semibold">Learn Skills</h3>
+        <p class="text-sm opacity-90">Upgrade your abilities</p>
+    </a>
+    
+    <a href="{{ url_for('cv_assistant') }}" class="bg-purple-600 text-white p-6 rounded-lg hover:bg-purple-700 transition text-center">
+        <i class="fas fa-file-alt text-3xl mb-2"></i>
+        <h3 class="font-semibold">CV Assistant</h3>
+        <p class="text-sm opacity-90">Improve your resume</p>
+    </a>
+    
+    <a href="{{ url_for('mentorship') }}" class="bg-orange-600 text-white p-6 rounded-lg hover:bg-orange-700 transition text-center">
+        <i class="fas fa-users text-3xl mb-2"></i>
+        <h3 class="font-semibold">Find Mentors</h3>
+        <p class="text-sm opacity-90">Get expert guidance</p>
+    </a>
+</div>
+{% endblock %}

@@ -1,0 +1,176 @@
+
+{% extends "base.html" %}
+
+{% block title %}CV Assistant - CareerLink{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- CV Input Section -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-6">AI CV Assistant</h1>
+        
+        <div class="mb-6">
+            <label for="cv-text" class="block text-gray-700 text-sm font-bold mb-2">
+                Paste Your CV Content:
+            </label>
+            <textarea id="cv-text" rows="15" placeholder="Paste your CV content here..."
+                      class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"></textarea>
+        </div>
+        
+        <button id="analyze-cv" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition w-full">
+            <i class="fas fa-search"></i> Analyze My CV
+        </button>
+    </div>
+    
+    <!-- Feedback Section -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold mb-4">AI Feedback</h2>
+        
+        <div id="feedback-container" class="hidden">
+            <div class="space-y-4" id="feedback-list"></div>
+        </div>
+        
+        <div id="feedback-placeholder" class="text-center py-8 text-gray-400">
+            <i class="fas fa-robot text-4xl mb-4"></i>
+            <p>Upload your CV to get AI-powered feedback and suggestions</p>
+        </div>
+    </div>
+</div>
+
+<!-- Interview Questions Section -->
+<div class="mt-8 bg-white rounded-lg shadow-md p-6">
+    <h2 class="text-2xl font-bold mb-6">Interview Practice</h2>
+    
+    <div class="mb-4">
+        <label for="job-role" class="block text-gray-700 text-sm font-bold mb-2">
+            Select Job Role:
+        </label>
+        <select id="job-role" class="w-full md:w-1/3 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500">
+            <option value="Software Developer">Software Developer</option>
+            <option value="Data Scientist">Data Scientist</option>
+            <option value="Product Manager">Product Manager</option>
+            <option value="UX Designer">UX Designer</option>
+        </select>
+        <button id="get-questions" class="ml-4 bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition">
+            Get Interview Questions
+        </button>
+    </div>
+    
+    <div id="questions-container" class="hidden">
+        <h3 class="text-lg font-semibold mb-4">Practice Questions:</h3>
+        <div id="questions-list" class="space-y-3"></div>
+    </div>
+</div>
+
+<script>
+document.getElementById('analyze-cv').addEventListener('click', function() {
+    const cvText = document.getElementById('cv-text').value;
+    
+    if (!cvText.trim()) {
+        alert('Please paste your CV content first!');
+        return;
+    }
+    
+    // Show loading
+    const button = this;
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+    button.disabled = true;
+    
+    fetch('/api/cv-feedback', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ cv_text: cvText })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.feedback) {
+            displayFeedback(data.feedback);
+        }
+        button.innerHTML = originalText;
+        button.disabled = false;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        button.innerHTML = originalText;
+        button.disabled = false;
+        alert('Error analyzing CV. Please try again.');
+    });
+});
+
+document.getElementById('get-questions').addEventListener('click', function() {
+    const jobRole = document.getElementById('job-role').value;
+    
+    // Show loading
+    const button = this;
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+    button.disabled = true;
+    
+    fetch(`/api/interview-questions?role=${encodeURIComponent(jobRole)}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.questions) {
+            displayQuestions(data.questions);
+        }
+        button.innerHTML = originalText;
+        button.disabled = false;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        button.innerHTML = originalText;
+        button.disabled = false;
+        alert('Error loading questions. Please try again.');
+    });
+});
+
+function displayFeedback(feedback) {
+    const container = document.getElementById('feedback-container');
+    const list = document.getElementById('feedback-list');
+    const placeholder = document.getElementById('feedback-placeholder');
+    
+    list.innerHTML = '';
+    
+    feedback.forEach((item, index) => {
+        const feedbackItem = document.createElement('div');
+        feedbackItem.className = 'p-4 bg-blue-50 border-l-4 border-blue-400 rounded';
+        feedbackItem.innerHTML = `
+            <div class="flex">
+                <div class="ml-3">
+                    <p class="text-sm text-blue-700">${item}</p>
+                </div>
+            </div>
+        `;
+        list.appendChild(feedbackItem);
+    });
+    
+    placeholder.classList.add('hidden');
+    container.classList.remove('hidden');
+}
+
+function displayQuestions(questions) {
+    const container = document.getElementById('questions-container');
+    const list = document.getElementById('questions-list');
+    
+    list.innerHTML = '';
+    
+    questions.forEach((question, index) => {
+        const questionItem = document.createElement('div');
+        questionItem.className = 'p-4 bg-gray-50 border rounded';
+        questionItem.innerHTML = `
+            <div class="flex items-start">
+                <span class="bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 mt-1">
+                    ${index + 1}
+                </span>
+                <p class="text-gray-800">${question}</p>
+            </div>
+        `;
+        list.appendChild(questionItem);
+    });
+    
+    container.classList.remove('hidden');
+}
+</script>
+{% endblock %}

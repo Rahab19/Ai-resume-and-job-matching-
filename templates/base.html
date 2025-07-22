@@ -1,0 +1,79 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CareerLink - AI-Driven Career Platform{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-blue-600 text-white shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-briefcase text-2xl"></i>
+                    <h1 class="text-xl font-bold">CareerLink</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    {% if session.username %}
+                        <a href="{{ url_for('dashboard') }}" class="hover:text-blue-200"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                        <a href="{{ url_for('job_matches') }}" class="hover:text-blue-200"><i class="fas fa-search"></i> Jobs</a>
+                        <a href="{{ url_for('courses') }}" class="hover:text-blue-200"><i class="fas fa-graduation-cap"></i> Courses</a>
+                        <a href="{{ url_for('cv_assistant') }}" class="hover:text-blue-200"><i class="fas fa-file-alt"></i> CV Assistant</a>
+                        <a href="{{ url_for('mentorship') }}" class="hover:text-blue-200"><i class="fas fa-users"></i> Mentors</a>
+                        <span class="text-blue-200">Welcome, {{ session.username }}!</span>
+                        <a href="{{ url_for('logout') }}" class="bg-blue-700 px-3 py-1 rounded hover:bg-blue-800"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="hover:text-blue-200">Login</a>
+                        <a href="{{ url_for('signup') }}" class="bg-blue-700 px-3 py-1 rounded hover:bg-blue-800">Sign Up</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mx-auto px-4 mt-4">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} bg-{% if category == 'error' %}red{% else %}green{% endif %}-100 border border-{% if category == 'error' %}red{% else %}green{% endif %}-400 text-{% if category == 'error' %}red{% else %}green{% endif %}-700 px-4 py-3 rounded mb-4">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-16">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">CareerLink</h3>
+                    <p class="text-gray-300">Empowering careers through AI-driven job matching and skills development.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">SDG Goals</h3>
+                    <ul class="text-gray-300">
+                        <li><i class="fas fa-graduation-cap"></i> SDG 4: Quality Education</li>
+                        <li><i class="fas fa-briefcase"></i> SDG 8: Decent Work</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Contact</h3>
+                    <p class="text-gray-300">Built with AI for a better future</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,75 @@
+
+{% extends "base.html" %}
+
+{% block title %}Courses - CareerLink{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold mb-4">Skills Development Courses</h1>
+    
+    <!-- Skill Gap Analysis Form -->
+    <div class="bg-blue-50 p-6 rounded-lg mb-6">
+        <h2 class="text-xl font-semibold mb-4">Find Courses for Your Target Skills</h2>
+        <form action="{{ url_for('courses') }}" method="GET" class="flex gap-4">
+            <input type="text" name="target_skills" placeholder="Enter target skills (e.g., Machine Learning, React, AWS)" 
+                   class="flex-1 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                   value="{{ request.args.get('target_skills', '') }}">
+            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
+                Get Recommendations
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for course in courses %}
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">{{ course.skill_category }}</span>
+                <span class="text-gray-500 text-sm">{{ course.difficulty_level }}</span>
+            </div>
+            
+            <h3 class="text-xl font-bold mb-2">{{ course.title }}</h3>
+            <p class="text-gray-600 mb-4">{{ course.description }}</p>
+            
+            <div class="mb-4">
+                <div class="flex items-center text-sm text-gray-500 space-y-1">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-building text-blue-500 mr-2"></i>
+                        <span>{{ course.provider }}</span>
+                    </div>
+                </div>
+                <div class="flex items-center text-sm text-gray-500">
+                    <i class="fas fa-clock text-green-500 mr-2"></i>
+                    <span>{{ course.duration }}</span>
+                </div>
+            </div>
+            
+            {% if course.relevance_score %}
+            <div class="mb-4">
+                <div class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm inline-block">
+                    Recommended for your goals
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="px-6 pb-6">
+            <a href="{{ course.url }}" target="_blank" 
+               class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition text-center block">
+                <i class="fas fa-external-link-alt"></i> Start Course
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if not courses %}
+<div class="text-center py-16">
+    <i class="fas fa-graduation-cap text-6xl text-gray-300 mb-4"></i>
+    <h2 class="text-2xl font-bold text-gray-500 mb-2">No courses found</h2>
+    <p class="text-gray-400">Try searching for specific skills to get course recommendations!</p>
+</div>
+{% endif %}
+{% endblock %}

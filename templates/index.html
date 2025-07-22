@@ -1,0 +1,62 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20 -mx-4 -mt-8 mb-16">
+    <div class="container mx-auto px-4 text-center">
+        <h1 class="text-5xl font-bold mb-6">Transform Your Career with AI</h1>
+        <p class="text-xl mb-8">Discover perfect job matches, develop skills, and get personalized career guidance</p>
+        <div class="space-x-4">
+            <a href="{{ url_for('signup') }}" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">Get Started</a>
+            <a href="{{ url_for('login') }}" class="border-2 border-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition">Login</a>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <i class="fas fa-robot text-4xl text-blue-600 mb-4"></i>
+        <h3 class="text-xl font-semibold mb-2">AI Job Matching</h3>
+        <p class="text-gray-600">Our advanced AI analyzes your skills and matches you with perfect job opportunities.</p>
+    </div>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <i class="fas fa-graduation-cap text-4xl text-green-600 mb-4"></i>
+        <h3 class="text-xl font-semibold mb-2">Skills Development</h3>
+        <p class="text-gray-600">Get personalized course recommendations to bridge your skill gaps and advance your career.</p>
+    </div>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <i class="fas fa-file-alt text-4xl text-purple-600 mb-4"></i>
+        <h3 class="text-xl font-semibold mb-2">CV & Interview Assistant</h3>
+        <p class="text-gray-600">Get AI-powered feedback on your CV and practice with intelligent interview questions.</p>
+    </div>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <i class="fas fa-users text-4xl text-orange-600 mb-4"></i>
+        <h3 class="text-xl font-semibold mb-2">Expert Mentorship</h3>
+        <p class="text-gray-600">Connect with industry experts who can guide your career journey.</p>
+    </div>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <i class="fas fa-chart-line text-4xl text-red-600 mb-4"></i>
+        <h3 class="text-xl font-semibold mb-2">Career Growth</h3>
+        <p class="text-gray-600">Track your progress and see how your skills align with market demands.</p>
+    </div>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <i class="fas fa-globe text-4xl text-teal-600 mb-4"></i>
+        <h3 class="text-xl font-semibold mb-2">SDG Impact</h3>
+        <p class="text-gray-600">Contributing to Quality Education (SDG 4) and Decent Work (SDG 8) goals.</p>
+    </div>
+</div>
+
+<!-- Call to Action -->
+<div class="bg-blue-100 p-8 rounded-lg text-center">
+    <h2 class="text-3xl font-bold mb-4">Ready to Transform Your Career?</h2>
+    <p class="text-lg text-gray-700 mb-6">Join thousands of professionals who have found their dream jobs through CareerLink</p>
+    <a href="{{ url_for('signup') }}" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition">Start Your Journey</a>
+</div>
+{% endblock %}

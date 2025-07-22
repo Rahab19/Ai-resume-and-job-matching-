@@ -1,0 +1,82 @@
+
+{% extends "base.html" %}
+
+{% block title %}Mentorship - CareerLink{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold mb-4">Connect with Expert Mentors</h1>
+    <p class="text-gray-600">Get personalized guidance from industry professionals to accelerate your career growth.</p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for mentor in mentors %}
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="text-center mb-4">
+            <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i class="fas fa-user text-white text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold">{{ mentor.name }}</h3>
+        </div>
+        
+        <div class="mb-4">
+            <div class="flex items-center mb-2">
+                <i class="fas fa-star text-yellow-500 mr-2"></i>
+                <span class="font-semibold">{{ mentor.rating }}/5.0</span>
+                <span class="text-gray-500 ml-2">({{ mentor.experience_years }} years exp.)</span>
+            </div>
+        </div>
+        
+        <div class="mb-4">
+            <h4 class="font-semibold text-gray-700 mb-2">Expertise:</h4>
+            <div class="flex flex-wrap gap-1">
+                {% for skill in mentor.expertise.split(',')[:3] %}
+                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">{{ skill.strip() }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="mb-4">
+            <div class="flex items-center text-sm text-gray-600">
+                <i class="fas fa-clock mr-2"></i>
+                <span>Available: {{ mentor.availability }}</span>
+            </div>
+        </div>
+        
+        <div class="space-y-2">
+            <button class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition">
+                <i class="fas fa-calendar"></i> Schedule Session
+            </button>
+            <button class="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded hover:bg-gray-200 transition">
+                <i class="fas fa-envelope"></i> Send Message
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Mentorship Benefits -->
+<div class="mt-16 bg-gradient-to-r from-blue-50 to-indigo-50 p-8 rounded-lg">
+    <h2 class="text-2xl font-bold mb-6 text-center">Why Choose Mentorship?</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="text-center">
+            <i class="fas fa-lightbulb text-4xl text-yellow-500 mb-4"></i>
+            <h3 class="font-semibold mb-2">Personalized Guidance</h3>
+            <p class="text-gray-600">Get tailored advice based on your specific career goals and challenges.</p>
+        </div>
+        
+        <div class="text-center">
+            <i class="fas fa-network-wired text-4xl text-green-500 mb-4"></i>
+            <h3 class="font-semibold mb-2">Industry Connections</h3>
+            <p class="text-gray-600">Expand your professional network through mentor connections.</p>
+        </div>
+        
+        <div class="text-center">
+            <i class="fas fa-rocket text-4xl text-purple-500 mb-4"></i>
+            <h3 class="font-semibold mb-2">Accelerated Growth</h3>
+            <p class="text-gray-600">Learn from experienced professionals and avoid common pitfalls.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
