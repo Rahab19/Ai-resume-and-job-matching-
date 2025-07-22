@@ -13,7 +13,7 @@
     {% for mentor in mentors %}
     <div class="bg-white rounded-lg shadow-md p-6">
         <div class="text-center mb-4">
-            <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-3">
+            <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3">
                 <i class="fas fa-user text-white text-2xl"></i>
             </div>
             <h3 class="text-xl font-bold">{{ mentor.name }}</h3>
@@ -31,7 +31,7 @@
             <h4 class="font-semibold text-gray-700 mb-2">Expertise:</h4>
             <div class="flex flex-wrap gap-1">
                 {% for skill in mentor.expertise.split(',')[:3] %}
-                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">{{ skill.strip() }}</span>
+                <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">{{ skill.strip() }}</span>
                 {% endfor %}
             </div>
         </div>
@@ -44,10 +44,12 @@
         </div>
         
         <div class="space-y-2">
-            <button class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition">
+            <button onclick="openScheduleModal({{ mentor.id }}, '{{ mentor.name }}')" 
+                    class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 px-4 rounded hover:from-purple-700 hover:to-indigo-700 transition">
                 <i class="fas fa-calendar"></i> Schedule Session
             </button>
-            <button class="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded hover:bg-gray-200 transition">
+            <button onclick="openMessageModal({{ mentor.id }}, '{{ mentor.name }}')" 
+                    class="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded hover:bg-gray-200 transition">
                 <i class="fas fa-envelope"></i> Send Message
             </button>
         </div>
@@ -55,8 +57,112 @@
     {% endfor %}
 </div>
 
+<!-- Schedule Session Modal -->
+<div id="scheduleModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg max-w-md w-full p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">Schedule Session</h3>
+                <button onclick="closeScheduleModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="scheduleForm">
+                <input type="hidden" id="scheduleMentorId">
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Mentor</label>
+                    <input type="text" id="scheduleMentorName" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50" readonly>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Session Date</label>
+                    <input type="date" id="sessionDate" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Session Time</label>
+                    <select id="sessionTime" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                        <option value="">Select time</option>
+                        <option value="09:00">9:00 AM</option>
+                        <option value="10:00">10:00 AM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="14:00">2:00 PM</option>
+                        <option value="15:00">3:00 PM</option>
+                        <option value="16:00">4:00 PM</option>
+                        <option value="17:00">5:00 PM</option>
+                    </select>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Topic/Goals</label>
+                    <textarea id="sessionTopic" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                              placeholder="What would you like to discuss?"></textarea>
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button type="button" onclick="closeScheduleModal()" 
+                            class="flex-1 px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="flex-1 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">
+                        Schedule Session
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Message Modal -->
+<div id="messageModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg max-w-md w-full p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">Send Message</h3>
+                <button onclick="closeMessageModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="messageForm">
+                <input type="hidden" id="messageMentorId">
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">To</label>
+                    <input type="text" id="messageMentorName" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50" readonly>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Message</label>
+                    <textarea id="messageText" rows="5" class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                              placeholder="Type your message here..." required></textarea>
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button type="button" onclick="closeMessageModal()" 
+                            class="flex-1 px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="flex-1 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">
+                        Send Message
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Success/Error Messages -->
+<div id="alertMessage" class="fixed top-4 right-4 hidden z-50">
+    <div id="alertContent" class="px-6 py-4 rounded-lg shadow-lg"></div>
+</div>
+
 <!-- Mentorship Benefits -->
-<div class="mt-16 bg-gradient-to-r from-blue-50 to-indigo-50 p-8 rounded-lg">
+<div class="mt-16 bg-gradient-to-r from-purple-50 to-indigo-50 p-8 rounded-lg">
     <h2 class="text-2xl font-bold mb-6 text-center">Why Choose Mentorship?</h2>
     
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -67,7 +173,7 @@
         </div>
         
         <div class="text-center">
-            <i class="fas fa-network-wired text-4xl text-green-500 mb-4"></i>
+            <i class="fas fa-network-wired text-4xl text-emerald-500 mb-4"></i>
             <h3 class="font-semibold mb-2">Industry Connections</h3>
             <p class="text-gray-600">Expand your professional network through mentor connections.</p>
         </div>
@@ -79,4 +185,124 @@
         </div>
     </div>
 </div>
+
+<script>
+// Modal functions
+function openScheduleModal(mentorId, mentorName) {
+    document.getElementById('scheduleMentorId').value = mentorId;
+    document.getElementById('scheduleMentorName').value = mentorName;
+    document.getElementById('scheduleModal').classList.remove('hidden');
+    
+    // Set minimum date to tomorrow
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById('sessionDate').min = tomorrow.toISOString().split('T')[0];
+}
+
+function closeScheduleModal() {
+    document.getElementById('scheduleModal').classList.add('hidden');
+    document.getElementById('scheduleForm').reset();
+}
+
+function openMessageModal(mentorId, mentorName) {
+    document.getElementById('messageMentorId').value = mentorId;
+    document.getElementById('messageMentorName').value = mentorName;
+    document.getElementById('messageModal').classList.remove('hidden');
+}
+
+function closeMessageModal() {
+    document.getElementById('messageModal').classList.add('hidden');
+    document.getElementById('messageForm').reset();
+}
+
+function showAlert(message, type = 'success') {
+    const alertDiv = document.getElementById('alertMessage');
+    const alertContent = document.getElementById('alertContent');
+    
+    alertContent.textContent = message;
+    alertContent.className = `px-6 py-4 rounded-lg shadow-lg ${type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`;
+    
+    alertDiv.classList.remove('hidden');
+    
+    setTimeout(() => {
+        alertDiv.classList.add('hidden');
+    }, 5000);
+}
+
+// Form submissions
+document.getElementById('scheduleForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = {
+        mentor_id: document.getElementById('scheduleMentorId').value,
+        session_date: document.getElementById('sessionDate').value,
+        session_time: document.getElementById('sessionTime').value,
+        topic: document.getElementById('sessionTopic').value
+    };
+    
+    try {
+        const response = await fetch('/api/schedule-session', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showAlert(result.message, 'success');
+            closeScheduleModal();
+        } else {
+            showAlert(result.error || 'Failed to schedule session', 'error');
+        }
+    } catch (error) {
+        showAlert('Network error. Please try again.', 'error');
+    }
+});
+
+document.getElementById('messageForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = {
+        mentor_id: document.getElementById('messageMentorId').value,
+        message: document.getElementById('messageText').value
+    };
+    
+    try {
+        const response = await fetch('/api/send-message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showAlert(result.message, 'success');
+            closeMessageModal();
+        } else {
+            showAlert(result.error || 'Failed to send message', 'error');
+        }
+    } catch (error) {
+        showAlert('Network error. Please try again.', 'error');
+    }
+});
+
+// Close modals when clicking outside
+document.getElementById('scheduleModal').addEventListener('click', (e) => {
+    if (e.target.id === 'scheduleModal') {
+        closeScheduleModal();
+    }
+});
+
+document.getElementById('messageModal').addEventListener('click', (e) => {
+    if (e.target.id === 'messageModal') {
+        closeMessageModal();
+    }
+});
+</script>
 {% endblock %}

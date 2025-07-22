@@ -406,6 +406,93 @@ def mentorship():
     
     return render_template('mentorship.html', mentors=mentor_list)
 
+@app.route('/api/schedule-session', methods=['POST'])
+def schedule_session():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    data = request.json
+    mentor_id = data.get('mentor_id')
+    session_date = data.get('session_date')
+    session_time = data.get('session_time')
+    topic = data.get('topic', '')
+    
+    # Get mentor details
+    conn = sqlite3.connect('careerlink.db')
+    c = conn.cursor()
+    c.execute('SELECT mentor_name FROM mentorship WHERE id = ?', (mentor_id,))
+    mentor = c.fetchone()
+    conn.close()
+    
+    if not mentor:
+        return jsonify({'error': 'Mentor not found'}), 404
+    
+    # In a real application, you would store this in a sessions table
+    # For now, we'll just return a success message
+    return jsonify({
+        'success': True,
+        'message': f'Session scheduled with {mentor[0]} on {session_date} at {session_time}',
+        'mentor_name': mentor[0],
+        'date': session_date,
+        'time': session_time,
+        'topic': topic
+    })
+
+@app.route('/api/send-message', methods=['POST'])
+def send_message():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    data = request.json
+    mentor_id = data.get('mentor_id')
+    message = data.get('message', '')
+    
+    # Get mentor details
+    conn = sqlite3.connect('careerlink.db')
+    c = conn.cursor()
+    c.execute('SELECT mentor_name, contact_info FROM mentorship WHERE id = ?', (mentor_id,))
+    mentor = c.fetchone()
+    conn.close()
+    
+    if not mentor:
+        return jsonify({'error': 'Mentor not found'}), 404
+    
+    # In a real application, you would store this in a messages table
+    # For now, we'll just return a success message
+    return jsonify({
+        'success': True,
+        'message': f'Message sent to {mentor[0]}',
+        'mentor_name': mentor[0],
+        'mentor_email': mentor[1],
+        'user_message': message
+    })
+
+@app.route('/api/get-mentor-details/<int:mentor_id>')
+def get_mentor_details(mentor_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    conn = sqlite3.connect('careerlink.db')
+    c = conn.cursor()
+    c.execute('SELECT * FROM mentorship WHERE id = ?', (mentor_id,))
+    mentor = c.fetchone()
+    conn.close()
+    
+    if not mentor:
+        return jsonify({'error': 'Mentor not found'}), 404
+    
+    mentor_data = {
+        'id': mentor[0],
+        'name': mentor[1],
+        'expertise': mentor[2],
+        'experience_years': mentor[3],
+        'availability': mentor[4],
+        'rating': mentor[5],
+        'contact_info': mentor[6]
+    }
+    
+    return jsonify(mentor_data)
+
 @app.route('/api/cv-feedback', methods=['POST'])
 def cv_feedback():
     if 'user_id' not in session:
