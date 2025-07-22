@@ -1,0 +1,378 @@
+
+{% extends "base.html" %}
+
+{% block title %}Job Applications - CareerLink{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <div class="flex justify-between items-center">
+        <h1 class="text-3xl font-bold mb-4">My Job Applications</h1>
+        <button onclick="openAddModal()" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition">
+            <i class="fas fa-plus"></i> Add Application
+        </button>
+    </div>
+    <p class="text-gray-600">Track your job applications and interview progress</p>
+</div>
+
+<!-- Application Statistics -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <i class="fas fa-paper-plane text-3xl text-blue-600 mb-2"></i>
+        <h3 class="text-lg font-semibold">Total Applied</h3>
+        <p class="text-2xl font-bold text-blue-600">{{ applications|selectattr('status', 'equalto', 'Applied')|list|length + applications|selectattr('status', 'equalto', 'Under Review')|list|length + applications|selectattr('status', 'equalto', 'Interview Scheduled')|list|length + applications|selectattr('status', 'equalto', 'Interviewed')|list|length + applications|selectattr('status', 'equalto', 'Offer Received')|list|length + applications|selectattr('status', 'equalto', 'Rejected')|list|length }}</p>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <i class="fas fa-hourglass-half text-3xl text-orange-600 mb-2"></i>
+        <h3 class="text-lg font-semibold">Under Review</h3>
+        <p class="text-2xl font-bold text-orange-600">{{ applications|selectattr('status', 'equalto', 'Under Review')|list|length }}</p>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <i class="fas fa-calendar-alt text-3xl text-green-600 mb-2"></i>
+        <h3 class="text-lg font-semibold">Interviews</h3>
+        <p class="text-2xl font-bold text-green-600">{{ applications|selectattr('status', 'equalto', 'Interview Scheduled')|list|length + applications|selectattr('status', 'equalto', 'Interviewed')|list|length }}</p>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <i class="fas fa-trophy text-3xl text-purple-600 mb-2"></i>
+        <h3 class="text-lg font-semibold">Offers</h3>
+        <p class="text-2xl font-bold text-purple-600">{{ applications|selectattr('status', 'equalto', 'Offer Received')|list|length }}</p>
+    </div>
+</div>
+
+<!-- Filter and Search -->
+<div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <div class="flex flex-wrap gap-4 mb-4">
+        <select id="status-filter" class="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500">
+            <option value="">All Statuses</option>
+            <option value="Applied">Applied</option>
+            <option value="Under Review">Under Review</option>
+            <option value="Interview Scheduled">Interview Scheduled</option>
+            <option value="Interviewed">Interviewed</option>
+            <option value="Offer Received">Offer Received</option>
+            <option value="Rejected">Rejected</option>
+        </select>
+        <input type="text" id="company-search" placeholder="Search by company..." class="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500">
+        <input type="text" id="position-search" placeholder="Search by position..." class="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500">
+    </div>
+</div>
+
+<!-- Applications List -->
+<div class="space-y-6" id="applications-container">
+    {% if applications %}
+        {% for app in applications %}
+        <div class="bg-white rounded-lg shadow-md p-6 application-card" data-status="{{ app.status }}" data-company="{{ app.company|lower }}" data-position="{{ app.job_title|lower }}">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">{{ app.job_title }}</h2>
+                    <p class="text-lg text-gray-600">{{ app.company }}</p>
+                    <div class="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                        <span><i class="fas fa-calendar"></i> Applied: {{ app.application_date.split(' ')[0] if app.application_date else 'N/A' }}</span>
+                        {% if app.interview_date %}
+                            <span><i class="fas fa-handshake"></i> Interview: {{ app.interview_date }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="px-3 py-1 rounded-full text-sm font-semibold
+                        {% if app.status == 'Applied' %}bg-blue-100 text-blue-800
+                        {% elif app.status == 'Under Review' %}bg-orange-100 text-orange-800
+                        {% elif app.status == 'Interview Scheduled' %}bg-purple-100 text-purple-800
+                        {% elif app.status == 'Interviewed' %}bg-indigo-100 text-indigo-800
+                        {% elif app.status == 'Offer Received' %}bg-green-100 text-green-800
+                        {% elif app.status == 'Rejected' %}bg-red-100 text-red-800
+                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {{ app.status }}
+                    </span>
+                    <button onclick="editApplication({{ app.id }})" class="text-blue-600 hover:text-blue-800 p-2">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="deleteApplication({{ app.id }})" class="text-red-600 hover:text-red-800 p-2">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            
+            {% if app.job_description %}
+            <div class="mb-4">
+                <h3 class="font-semibold mb-2">Description:</h3>
+                <p class="text-gray-700 text-sm">{{ app.job_description[:200] }}{% if app.job_description|length > 200 %}...{% endif %}</p>
+            </div>
+            {% endif %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                {% if app.salary_offered %}
+                <div>
+                    <span class="font-semibold">Salary:</span> {{ app.salary_offered }}
+                </div>
+                {% endif %}
+                {% if app.contact_person %}
+                <div>
+                    <span class="font-semibold">Contact:</span> {{ app.contact_person }}
+                </div>
+                {% endif %}
+                {% if app.follow_up_date %}
+                <div>
+                    <span class="font-semibold">Follow-up:</span> {{ app.follow_up_date }}
+                </div>
+                {% endif %}
+            </div>
+            
+            {% if app.notes %}
+            <div class="mt-4 pt-4 border-t">
+                <span class="font-semibold">Notes:</span>
+                <p class="text-gray-700 text-sm mt-1">{{ app.notes }}</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="text-center py-16">
+            <i class="fas fa-clipboard-list text-6xl text-gray-300 mb-4"></i>
+            <h2 class="text-2xl font-bold text-gray-500 mb-2">No applications yet</h2>
+            <p class="text-gray-400 mb-6">Start tracking your job applications to stay organized</p>
+            <button onclick="openAddModal()" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition">
+                <i class="fas fa-plus"></i> Add Your First Application
+            </button>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Add/Edit Application Modal -->
+<div id="application-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen px-4">
+        <div class="bg-white rounded-lg shadow-lg max-w-2xl w-full max-h-screen overflow-y-auto">
+            <div class="p-6 border-b">
+                <div class="flex justify-between items-center">
+                    <h2 id="modal-title" class="text-2xl font-bold">Add Job Application</h2>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <form id="application-form" class="p-6 space-y-4">
+                <input type="hidden" id="app-id">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Job Title *</label>
+                        <input type="text" id="job-title" required class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Company *</label>
+                        <input type="text" id="company" required class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Job Description</label>
+                    <textarea id="job-description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500"></textarea>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Status</label>
+                        <select id="status" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500">
+                            <option value="Applied">Applied</option>
+                            <option value="Under Review">Under Review</option>
+                            <option value="Interview Scheduled">Interview Scheduled</option>
+                            <option value="Interviewed">Interviewed</option>
+                            <option value="Offer Received">Offer Received</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Salary Offered</label>
+                        <input type="text" id="salary-offered" placeholder="e.g., $70,000 - $90,000" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Interview Date</label>
+                        <input type="date" id="interview-date" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Interview Type</label>
+                        <select id="interview-type" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500">
+                            <option value="">Select Type</option>
+                            <option value="Phone">Phone</option>
+                            <option value="Video">Video Call</option>
+                            <option value="In-Person">In-Person</option>
+                            <option value="Technical">Technical</option>
+                            <option value="Final">Final Round</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Contact Person</label>
+                        <input type="text" id="contact-person" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Contact Email</label>
+                        <input type="email" id="contact-email" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Job URL</label>
+                        <input type="url" id="job-url" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Follow-up Date</label>
+                        <input type="date" id="follow-up-date" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Notes</label>
+                    <textarea id="notes" rows="3" placeholder="Add any notes about the application, interview feedback, etc." class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500"></textarea>
+                </div>
+                
+                <div class="flex justify-end space-x-4 pt-4">
+                    <button type="button" onclick="closeModal()" class="px-6 py-2 border border-gray-300 rounded hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="px-6 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">Save Application</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentApplications = {{ applications|tojson }};
+
+// Filter functionality
+document.getElementById('status-filter').addEventListener('change', filterApplications);
+document.getElementById('company-search').addEventListener('input', filterApplications);
+document.getElementById('position-search').addEventListener('input', filterApplications);
+
+function filterApplications() {
+    const statusFilter = document.getElementById('status-filter').value;
+    const companySearch = document.getElementById('company-search').value.toLowerCase();
+    const positionSearch = document.getElementById('position-search').value.toLowerCase();
+    
+    const cards = document.querySelectorAll('.application-card');
+    
+    cards.forEach(card => {
+        const status = card.dataset.status;
+        const company = card.dataset.company;
+        const position = card.dataset.position;
+        
+        const statusMatch = !statusFilter || status === statusFilter;
+        const companyMatch = !companySearch || company.includes(companySearch);
+        const positionMatch = !positionSearch || position.includes(positionSearch);
+        
+        if (statusMatch && companyMatch && positionMatch) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+function openAddModal() {
+    document.getElementById('modal-title').textContent = 'Add Job Application';
+    document.getElementById('application-form').reset();
+    document.getElementById('app-id').value = '';
+    document.getElementById('application-modal').classList.remove('hidden');
+}
+
+function editApplication(appId) {
+    const app = currentApplications.find(a => a.id === appId);
+    if (!app) return;
+    
+    document.getElementById('modal-title').textContent = 'Edit Job Application';
+    document.getElementById('app-id').value = app.id;
+    document.getElementById('job-title').value = app.job_title || '';
+    document.getElementById('company').value = app.company || '';
+    document.getElementById('job-description').value = app.job_description || '';
+    document.getElementById('status').value = app.status || 'Applied';
+    document.getElementById('salary-offered').value = app.salary_offered || '';
+    document.getElementById('interview-date').value = app.interview_date || '';
+    document.getElementById('interview-type').value = app.interview_type || '';
+    document.getElementById('contact-person').value = app.contact_person || '';
+    document.getElementById('contact-email').value = app.contact_email || '';
+    document.getElementById('job-url').value = app.job_url || '';
+    document.getElementById('follow-up-date').value = app.follow_up_date || '';
+    document.getElementById('notes').value = app.notes || '';
+    
+    document.getElementById('application-modal').classList.remove('hidden');
+}
+
+function closeModal() {
+    document.getElementById('application-modal').classList.add('hidden');
+}
+
+function deleteApplication(appId) {
+    if (confirm('Are you sure you want to delete this application?')) {
+        fetch(`/api/job-applications/${appId}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error deleting application');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting application');
+        });
+    }
+}
+
+document.getElementById('application-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const appId = document.getElementById('app-id').value;
+    const formData = {
+        job_title: document.getElementById('job-title').value,
+        company: document.getElementById('company').value,
+        job_description: document.getElementById('job-description').value,
+        status: document.getElementById('status').value,
+        salary_offered: document.getElementById('salary-offered').value,
+        interview_date: document.getElementById('interview-date').value,
+        interview_type: document.getElementById('interview-type').value,
+        contact_person: document.getElementById('contact-person').value,
+        contact_email: document.getElementById('contact-email').value,
+        job_url: document.getElementById('job-url').value,
+        follow_up_date: document.getElementById('follow-up-date').value,
+        notes: document.getElementById('notes').value
+    };
+    
+    const url = appId ? `/api/job-applications/${appId}` : '/api/job-applications';
+    const method = appId ? 'PUT' : 'POST';
+    
+    fetch(url, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error saving application');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error saving application');
+    });
+});
+
+// Close modal when clicking outside
+document.getElementById('application-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeModal();
+    }
+});
+</script>
+{% endblock %}

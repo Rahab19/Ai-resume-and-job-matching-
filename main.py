@@ -116,6 +116,29 @@ def init_db():
         )
     ''')
     
+    # Job applications table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS job_applications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            job_title TEXT NOT NULL,
+            company TEXT NOT NULL,
+            job_description TEXT,
+            application_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            status TEXT DEFAULT 'Applied',
+            interview_date TEXT,
+            interview_type TEXT,
+            notes TEXT,
+            salary_offered TEXT,
+            job_url TEXT,
+            contact_person TEXT,
+            contact_email TEXT,
+            follow_up_date TEXT,
+            last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+    
     conn.commit()
     conn.close()
 
@@ -723,6 +746,129 @@ def mark_all_notifications_read():
     conn.close()
     
     return jsonify({'success': True})
+
+@app.route('/job-applications')
+def job_applications():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    user_id = session['user_id']
+    
+    conn = sqlite3.connect('careerlink.db')
+    c = conn.cursor()
+    c.execute('SELECT * FROM job_applications WHERE user_id = ? ORDER BY last_updated DESC', (user_id,))
+    applications = c.fetchall()
+    conn.close()
+    
+    application_list = []
+    for app in applications:
+        application_list.append({
+            'id': app[0],
+            'job_title': app[2],
+            'company': app[3],
+            'job_description': app[4],
+            'application_date': app[5],
+            'status': app[6],
+            'interview_date': app[7],
+            'interview_type': app[8],
+            'notes': app[9],
+            'salary_offered': app[10],
+            'job_url': app[11],
+            'contact_person': app[12],
+            'contact_email': app[13],
+            'follow_up_date': app[14],
+            'last_updated': app[15]
+        })
+    
+    return render_template('job_applications.html', applications=application_list)
+
+@app.route('/api/job-applications', methods=['POST'])
+def add_job_application():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    user_id = session['user_id']
+    data = request.json
+    
+    conn = sqlite3.connect('careerlink.db')
+    c = conn.cursor()
+    c.execute('''
+        INSERT INTO job_applications 
+        (user_id, job_title, company, job_description, status, interview_date, interview_type, 
+         notes, salary_offered, job_url, contact_person, contact_email, follow_up_date)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (
+        user_id,
+        data.get('job_title', ''),
+        data.get('company', ''),
+        data.get('job_description', ''),
+        data.get('status', 'Applied'),
+        data.get('interview_date', ''),
+        data.get('interview_type', ''),
+        data.get('notes', ''),
+        data.get('salary_offered', ''),
+        data.get('job_url', ''),
+        data.get('contact_person', ''),
+        data.get('contact_email', ''),
+        data.get('follow_up_date', '')
+    ))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True, 'message': 'Application added successfully'})
+
+@app.route('/api/job-applications/<int:app_id>', methods=['PUT'])
+def update_job_application(app_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    user_id = session['user_id']
+    data = request.json
+    
+    conn = sqlite3.connect('careerlink.db')
+    c = conn.cursor()
+    c.execute('''
+        UPDATE job_applications SET
+        job_title = ?, company = ?, job_description = ?, status = ?,
+        interview_date = ?, interview_type = ?, notes = ?, salary_offered = ?,
+        job_url = ?, contact_person = ?, contact_email = ?, follow_up_date = ?,
+        last_updated = CURRENT_TIMESTAMP
+        WHERE id = ? AND user_id = ?
+    ''', (
+        data.get('job_title', ''),
+        data.get('company', ''),
+        data.get('job_description', ''),
+        data.get('status', 'Applied'),
+        data.get('interview_date', ''),
+        data.get('interview_type', ''),
+        data.get('notes', ''),
+        data.get('salary_offered', ''),
+        data.get('job_url', ''),
+        data.get('contact_person', ''),
+        data.get('contact_email', ''),
+        data.get('follow_up_date', ''),
+        app_id,
+        user_id
+    ))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True, 'message': 'Application updated successfully'})
+
+@app.route('/api/job-applications/<int:app_id>', methods=['DELETE'])
+def delete_job_application(app_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    user_id = session['user_id']
+    
+    conn = sqlite3.connect('careerlink.db')
+    c = conn.cursor()
+    c.execute('DELETE FROM job_applications WHERE id = ? AND user_id = ?', (app_id, user_id))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True, 'message': 'Application deleted successfully'})
 
 if __name__ == '__main__':
     init_db()
