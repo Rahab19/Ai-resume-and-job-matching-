@@ -129,6 +129,9 @@ def insert_sample_data():
     
     c.executemany('INSERT OR IGNORE INTO courses (title, description, provider, skill_category, difficulty_level, duration, url) VALUES (?, ?, ?, ?, ?, ?, ?)', sample_courses)
     
+    # Clear existing mentors and add new diverse set
+    c.execute('DELETE FROM mentorship')
+    
     # Sample mentors
     sample_mentors = [
         ("Amara Okafor", "Software Engineering, Python, Web Development", 8, "Weekends", 4.8, "amara.okafor@email.com"),
@@ -141,7 +144,7 @@ def insert_sample_data():
         ("Aleksandr Petrov", "Mobile Development, iOS, Android, Flutter", 5, "Weekends", 4.8, "aleksandr.petrov@email.com")
     ]
     
-    c.executemany('INSERT OR IGNORE INTO mentorship (mentor_name, expertise, experience_years, availability, rating, contact_info) VALUES (?, ?, ?, ?, ?, ?)', sample_mentors)
+    c.executemany('INSERT INTO mentorship (mentor_name, expertise, experience_years, availability, rating, contact_info) VALUES (?, ?, ?, ?, ?, ?)', sample_mentors)
     
     conn.commit()
     conn.close()
