@@ -1,6 +1,7 @@
 
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 import sqlite3
 import os
 import json
@@ -12,6 +13,19 @@ import numpy as np
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-change-this'
+
+# File upload configuration
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'doc', 'docx'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+
+# Create upload directory if it doesn't exist
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Initialize database
 def init_db():
@@ -401,8 +415,82 @@ def cv_feedback():
         return jsonify({'error': 'Not authenticated'}), 401
     
     cv_text = request.json.get('cv_text', '')
+    feedback = analyze_cv_text(cv_text)
+    return jsonify({'feedback': feedback})
+
+@app.route('/api/cv-upload-feedback', methods=['POST'])
+def cv_upload_feedback():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
     
-    # Simple CV analysis (in a real application, you'd use more sophisticated AI)
+    if 'cv_file' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
+    
+    file = request.files['cv_file']
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+    
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+        
+        try:
+            # Extract text from file
+            cv_text = extract_text_from_file(filepath)
+            
+            # Clean up uploaded file
+            os.remove(filepath)
+            
+            # Analyze the extracted text
+            feedback = analyze_cv_text(cv_text)
+            return jsonify({'feedback': feedback})
+            
+        except Exception as e:
+            # Clean up file if error occurs
+            if os.path.exists(filepath):
+                os.remove(filepath)
+            return jsonify({'error': f'Error processing file: {str(e)}'}), 500
+    
+    return jsonify({'error': 'Invalid file type'}), 400
+
+def extract_text_from_file(filepath):
+    """Extract text from uploaded file"""
+    filename = filepath.lower()
+    
+    if filename.endswith('.txt'):
+        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+            return f.read()
+    
+    elif filename.endswith('.pdf'):
+        # For PDF files, we'll provide a simplified extraction
+        # In a production environment, you'd want to use libraries like PyPDF2 or pdfplumber
+        try:
+            # Simple PDF text extraction placeholder
+            # You would need to install PyPDF2: pip install PyPDF2
+            # import PyPDF2
+            # with open(filepath, 'rb') as f:
+            #     reader = PyPDF2.PdfReader(f)
+            #     text = ""
+            #     for page in reader.pages:
+            #         text += page.extract_text()
+            #     return text
+            
+            # For now, return a message indicating PDF processing
+            return "PDF file uploaded. For full PDF processing, additional libraries would be needed in production."
+        except:
+            return "Error reading PDF file. Please try converting to text format."
+    
+    elif filename.endswith(('.doc', '.docx')):
+        # For Word documents, you'd typically use python-docx
+        # For now, return a placeholder message
+        return "Word document uploaded. For full Word document processing, additional libraries would be needed in production."
+    
+    else:
+        return "Unsupported file format."
+
+def analyze_cv_text(cv_text):
+    """Analyze CV text and provide feedback"""
     feedback = []
     
     if len(cv_text) < 200:
@@ -417,10 +505,16 @@ def cv_feedback():
     if not any(keyword in cv_text.lower() for keyword in ['project', 'developed', 'created', 'built']):
         feedback.append("Consider adding more action verbs and specific projects to showcase your achievements.")
     
+    if 'education' not in cv_text.lower() and 'degree' not in cv_text.lower():
+        feedback.append("Consider adding your educational background if relevant to your target position.")
+    
+    if 'experience' not in cv_text.lower() and 'work' not in cv_text.lower():
+        feedback.append("Make sure to highlight your work experience and professional background.")
+    
     if not feedback:
         feedback.append("Your CV looks good! Keep updating it with new skills and experiences.")
     
-    return jsonify({'feedback': feedback})
+    return feedback
 
 @app.route('/api/interview-questions')
 def interview_questions():

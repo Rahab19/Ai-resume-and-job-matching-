@@ -10,11 +10,47 @@
         <h1 class="text-2xl font-bold mb-6">AI CV Assistant</h1>
         
         <div class="mb-6">
-            <label for="cv-text" class="block text-gray-700 text-sm font-bold mb-2">
-                Paste Your CV Content:
-            </label>
-            <textarea id="cv-text" rows="15" placeholder="Paste your CV content here..."
-                      class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"></textarea>
+            <div class="flex items-center mb-4">
+                <button id="upload-tab" class="px-4 py-2 bg-blue-600 text-white rounded-l focus:outline-none">
+                    <i class="fas fa-upload"></i> Upload File
+                </button>
+                <button id="paste-tab" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-r focus:outline-none">
+                    <i class="fas fa-paste"></i> Paste Text
+                </button>
+            </div>
+            
+            <!-- File Upload Section -->
+            <div id="upload-section">
+                <label for="cv-file" class="block text-gray-700 text-sm font-bold mb-2">
+                    Upload Your Resume (PDF or TXT):
+                </label>
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <input type="file" id="cv-file" accept=".pdf,.txt,.doc,.docx" class="hidden">
+                    <div id="file-drop-zone" class="cursor-pointer">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"></i>
+                        <p class="text-gray-600">Click to upload or drag and drop your resume</p>
+                        <p class="text-sm text-gray-400">Supports PDF, TXT, DOC, DOCX files</p>
+                    </div>
+                    <div id="file-info" class="hidden mt-4">
+                        <div class="flex items-center justify-center space-x-2">
+                            <i class="fas fa-file text-blue-600"></i>
+                            <span id="file-name" class="text-gray-700"></span>
+                            <button id="remove-file" class="text-red-500 hover:text-red-700">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Text Paste Section -->
+            <div id="paste-section" class="hidden">
+                <label for="cv-text" class="block text-gray-700 text-sm font-bold mb-2">
+                    Paste Your CV Content:
+                </label>
+                <textarea id="cv-text" rows="15" placeholder="Paste your CV content here..."
+                          class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"></textarea>
+            </div>
         </div>
         
         <button id="analyze-cv" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition w-full">
@@ -63,12 +99,95 @@
 </div>
 
 <script>
-document.getElementById('analyze-cv').addEventListener('click', function() {
-    const cvText = document.getElementById('cv-text').value;
+let uploadedFile = null;
+
+// Tab switching
+document.getElementById('upload-tab').addEventListener('click', function() {
+    document.getElementById('upload-section').classList.remove('hidden');
+    document.getElementById('paste-section').classList.add('hidden');
+    this.classList.add('bg-blue-600', 'text-white');
+    this.classList.remove('bg-gray-300', 'text-gray-700');
+    document.getElementById('paste-tab').classList.add('bg-gray-300', 'text-gray-700');
+    document.getElementById('paste-tab').classList.remove('bg-blue-600', 'text-white');
+});
+
+document.getElementById('paste-tab').addEventListener('click', function() {
+    document.getElementById('paste-section').classList.remove('hidden');
+    document.getElementById('upload-section').classList.add('hidden');
+    this.classList.add('bg-blue-600', 'text-white');
+    this.classList.remove('bg-gray-300', 'text-gray-700');
+    document.getElementById('upload-tab').classList.add('bg-gray-300', 'text-gray-700');
+    document.getElementById('upload-tab').classList.remove('bg-blue-600', 'text-white');
+});
+
+// File upload handling
+document.getElementById('file-drop-zone').addEventListener('click', function() {
+    document.getElementById('cv-file').click();
+});
+
+document.getElementById('cv-file').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        uploadedFile = file;
+        document.getElementById('file-name').textContent = file.name;
+        document.getElementById('file-info').classList.remove('hidden');
+    }
+});
+
+document.getElementById('remove-file').addEventListener('click', function(e) {
+    e.stopPropagation();
+    uploadedFile = null;
+    document.getElementById('cv-file').value = '';
+    document.getElementById('file-info').classList.add('hidden');
+});
+
+// Drag and drop functionality
+document.getElementById('file-drop-zone').addEventListener('dragover', function(e) {
+    e.preventDefault();
+    this.classList.add('border-blue-500', 'bg-blue-50');
+});
+
+document.getElementById('file-drop-zone').addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    this.classList.remove('border-blue-500', 'bg-blue-50');
+});
+
+document.getElementById('file-drop-zone').addEventListener('drop', function(e) {
+    e.preventDefault();
+    this.classList.remove('border-blue-500', 'bg-blue-50');
     
-    if (!cvText.trim()) {
-        alert('Please paste your CV content first!');
-        return;
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        const file = files[0];
+        if (file.type.includes('pdf') || file.type.includes('text') || file.name.endsWith('.txt') || file.name.endsWith('.doc') || file.name.endsWith('.docx')) {
+            uploadedFile = file;
+            document.getElementById('file-name').textContent = file.name;
+            document.getElementById('file-info').classList.remove('hidden');
+        } else {
+            alert('Please upload a PDF, TXT, DOC, or DOCX file.');
+        }
+    }
+});
+
+document.getElementById('analyze-cv').addEventListener('click', function() {
+    let cvData = null;
+    
+    // Check if using upload or paste
+    if (!document.getElementById('upload-section').classList.contains('hidden')) {
+        // Upload mode
+        if (!uploadedFile) {
+            alert('Please upload a resume file first!');
+            return;
+        }
+        cvData = uploadedFile;
+    } else {
+        // Paste mode
+        const cvText = document.getElementById('cv-text').value;
+        if (!cvText.trim()) {
+            alert('Please paste your CV content first!');
+            return;
+        }
+        cvData = cvText;
     }
     
     // Show loading
@@ -77,27 +196,53 @@ document.getElementById('analyze-cv').addEventListener('click', function() {
     button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
     button.disabled = true;
     
-    fetch('/api/cv-feedback', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ cv_text: cvText })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.feedback) {
-            displayFeedback(data.feedback);
-        }
-        button.innerHTML = originalText;
-        button.disabled = false;
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        button.innerHTML = originalText;
-        button.disabled = false;
-        alert('Error analyzing CV. Please try again.');
-    });
+    if (typeof cvData === 'string') {
+        // Text analysis
+        fetch('/api/cv-feedback', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ cv_text: cvData })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.feedback) {
+                displayFeedback(data.feedback);
+            }
+            button.innerHTML = originalText;
+            button.disabled = false;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            button.innerHTML = originalText;
+            button.disabled = false;
+            alert('Error analyzing CV. Please try again.');
+        });
+    } else {
+        // File upload analysis
+        const formData = new FormData();
+        formData.append('cv_file', cvData);
+        
+        fetch('/api/cv-upload-feedback', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.feedback) {
+                displayFeedback(data.feedback);
+            }
+            button.innerHTML = originalText;
+            button.disabled = false;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            button.innerHTML = originalText;
+            button.disabled = false;
+            alert('Error analyzing CV. Please try again.');
+        });
+    }
 });
 
 document.getElementById('get-questions').addEventListener('click', function() {
