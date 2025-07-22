@@ -131,11 +131,14 @@ def insert_sample_data():
     
     # Sample mentors
     sample_mentors = [
-        ("Sarah Johnson", "Software Engineering, Python, Web Development", 8, "Weekends", 4.8, "sarah.j@email.com"),
-        ("Michael Chen", "Data Science, Machine Learning, Statistics", 6, "Evenings", 4.9, "m.chen@email.com"),
-        ("Emily Rodriguez", "UX Design, User Research, Product Design", 5, "Flexible", 4.7, "emily.r@email.com"),
-        ("David Kim", "DevOps, Cloud Computing, AWS", 7, "Weekdays", 4.6, "david.k@email.com"),
-        ("Lisa Thompson", "Frontend Development, React, JavaScript", 4, "Mornings", 4.8, "lisa.t@email.com")
+        ("Amara Okafor", "Software Engineering, Python, Web Development", 8, "Weekends", 4.8, "amara.okafor@email.com"),
+        ("Rajesh Patel", "Data Science, Machine Learning, Statistics", 6, "Evenings", 4.9, "rajesh.patel@email.com"),
+        ("Zara Al-Mansouri", "UX Design, User Research, Product Design", 5, "Flexible", 4.7, "zara.almansouri@email.com"),
+        ("Kai Nakamura", "DevOps, Cloud Computing, AWS", 7, "Weekdays", 4.6, "kai.nakamura@email.com"),
+        ("Isabella Santos", "Frontend Development, React, JavaScript", 4, "Mornings", 4.8, "isabella.santos@email.com"),
+        ("Marcus Williams", "Backend Development, API Design, Database Architecture", 9, "Evenings", 4.9, "marcus.williams@email.com"),
+        ("Fatima Hassan", "Cybersecurity, Network Security, Ethical Hacking", 6, "Flexible", 4.7, "fatima.hassan@email.com"),
+        ("Aleksandr Petrov", "Mobile Development, iOS, Android, Flutter", 5, "Weekends", 4.8, "aleksandr.petrov@email.com")
     ]
     
     c.executemany('INSERT OR IGNORE INTO mentorship (mentor_name, expertise, experience_years, availability, rating, contact_info) VALUES (?, ?, ?, ?, ?, ?)', sample_mentors)
