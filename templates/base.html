@@ -10,25 +10,25 @@
 </head>
 <body class="bg-gray-50 min-h-screen">
     <!-- Navigation -->
-    <nav class="bg-blue-600 text-white shadow-lg">
+    <nav class="bg-gradient-to-r from-purple-700 to-indigo-800 text-white shadow-lg">
         <div class="container mx-auto px-4">
             <div class="flex justify-between items-center py-4">
                 <div class="flex items-center space-x-4">
-                    <i class="fas fa-briefcase text-2xl"></i>
+                    <i class="fas fa-briefcase text-2xl text-teal-300"></i>
                     <h1 class="text-xl font-bold">CareerLink</h1>
                 </div>
                 <div class="flex items-center space-x-4">
                     {% if session.username %}
-                        <a href="{{ url_for('dashboard') }}" class="hover:text-blue-200"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-                        <a href="{{ url_for('job_matches') }}" class="hover:text-blue-200"><i class="fas fa-search"></i> Jobs</a>
-                        <a href="{{ url_for('courses') }}" class="hover:text-blue-200"><i class="fas fa-graduation-cap"></i> Courses</a>
-                        <a href="{{ url_for('cv_assistant') }}" class="hover:text-blue-200"><i class="fas fa-file-alt"></i> CV Assistant</a>
-                        <a href="{{ url_for('mentorship') }}" class="hover:text-blue-200"><i class="fas fa-users"></i> Mentors</a>
-                        <span class="text-blue-200">Welcome, {{ session.username }}!</span>
-                        <a href="{{ url_for('logout') }}" class="bg-blue-700 px-3 py-1 rounded hover:bg-blue-800"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        <a href="{{ url_for('dashboard') }}" class="hover:text-teal-200 transition"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                        <a href="{{ url_for('job_matches') }}" class="hover:text-teal-200 transition"><i class="fas fa-search"></i> Jobs</a>
+                        <a href="{{ url_for('courses') }}" class="hover:text-teal-200 transition"><i class="fas fa-graduation-cap"></i> Courses</a>
+                        <a href="{{ url_for('cv_assistant') }}" class="hover:text-teal-200 transition"><i class="fas fa-file-alt"></i> CV Assistant</a>
+                        <a href="{{ url_for('mentorship') }}" class="hover:text-teal-200 transition"><i class="fas fa-users"></i> Mentors</a>
+                        <span class="text-purple-200">Welcome, {{ session.username }}!</span>
+                        <a href="{{ url_for('logout') }}" class="bg-purple-800 px-3 py-1 rounded hover:bg-purple-900 transition"><i class="fas fa-sign-out-alt"></i> Logout</a>
                     {% else %}
-                        <a href="{{ url_for('login') }}" class="hover:text-blue-200">Login</a>
-                        <a href="{{ url_for('signup') }}" class="bg-blue-700 px-3 py-1 rounded hover:bg-blue-800">Sign Up</a>
+                        <a href="{{ url_for('login') }}" class="hover:text-teal-200 transition">Login</a>
+                        <a href="{{ url_for('signup') }}" class="bg-purple-800 px-3 py-1 rounded hover:bg-purple-900 transition">Sign Up</a>
                     {% endif %}
                 </div>
             </div>
@@ -40,7 +40,7 @@
         {% if messages %}
             <div class="container mx-auto px-4 mt-4">
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} bg-{% if category == 'error' %}red{% else %}green{% endif %}-100 border border-{% if category == 'error' %}red{% else %}green{% endif %}-400 text-{% if category == 'error' %}red{% else %}green{% endif %}-700 px-4 py-3 rounded mb-4">
+                    <div class="alert alert-{{ category }} bg-{% if category == 'error' %}red{% else %}teal{% endif %}-100 border border-{% if category == 'error' %}red{% else %}teal{% endif %}-400 text-{% if category == 'error' %}red{% else %}teal{% endif %}-700 px-4 py-3 rounded mb-4">
                         {{ message }}
                     </div>
                 {% endfor %}
