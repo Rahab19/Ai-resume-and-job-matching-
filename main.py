@@ -121,13 +121,13 @@ def insert_sample_data():
     
     c.executemany('INSERT OR IGNORE INTO jobs (title, company, description, requirements, location, salary_range, job_type) VALUES (?, ?, ?, ?, ?, ?, ?)', sample_jobs)
     
-    # Sample courses (demo content only)
+    # Sample courses with working educational links
     sample_courses = [
-        ("Python for Beginners", "Complete Python programming course", "CareerLink Academy", "Programming", "Beginner", "40 hours", "#course-coming-soon"),
-        ("Machine Learning Course", "Introduction to ML algorithms and concepts", "CareerLink Academy", "Data Science", "Intermediate", "60 hours", "#course-coming-soon"),
-        ("React Development", "Build modern web applications with React", "CareerLink Academy", "Frontend", "Intermediate", "30 hours", "#course-coming-soon"),
-        ("AWS Cloud Essentials", "Learn cloud computing with AWS", "CareerLink Academy", "Cloud", "Beginner", "25 hours", "#course-coming-soon"),
-        ("UI/UX Design Fundamentals", "Design thinking and user experience", "CareerLink Academy", "Design", "Beginner", "35 hours", "#course-coming-soon")
+        ("Python for Beginners", "Complete Python programming course", "freeCodeCamp", "Programming", "Beginner", "40 hours", "https://www.freecodecamp.org/learn/scientific-computing-with-python/"),
+        ("Machine Learning Course", "Introduction to ML algorithms and concepts", "Khan Academy", "Data Science", "Intermediate", "60 hours", "https://www.khanacademy.org/computing/ap-computer-science-principles"),
+        ("React Development", "Build modern web applications with React", "React Official", "Frontend", "Intermediate", "30 hours", "https://react.dev/learn"),
+        ("AWS Cloud Essentials", "Learn cloud computing fundamentals", "AWS Free Tier", "Cloud", "Beginner", "25 hours", "https://aws.amazon.com/free/"),
+        ("UI/UX Design Fundamentals", "Design thinking and user experience", "Google Design", "Design", "Beginner", "35 hours", "https://design.google/")
     ]
     
     c.executemany('INSERT OR IGNORE INTO courses (title, description, provider, skill_category, difficulty_level, duration, url) VALUES (?, ?, ?, ?, ?, ?, ?)', sample_courses)
