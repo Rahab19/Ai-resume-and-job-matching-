@@ -121,18 +121,13 @@ def insert_sample_data():
     
     c.executemany('INSERT OR IGNORE INTO jobs (title, company, description, requirements, location, salary_range, job_type) VALUES (?, ?, ?, ?, ?, ?, ?)', sample_jobs)
     
-    # Sample courses
+    # Sample courses (demo content only)
     sample_courses = [
-        ("Python for Beginners", "Complete Python programming course", "Codecademy", "Programming", "Beginner", "40 hours", "https://www.codecademy.com/learn/learn-python-3"),
-        ("Machine Learning Course", "Introduction to ML algorithms and concepts", "Coursera", "Data Science", "Intermediate", "60 hours", "https://www.coursera.org/learn/machine-learning"),
-        ("React - The Complete Guide", "Build modern web applications with React", "Udemy", "Frontend", "Intermediate", "30 hours", "https://www.udemy.com/course/react-the-complete-guide-incl-redux/"),
-        ("AWS Cloud Practitioner", "Learn cloud computing with AWS", "AWS Training", "Cloud", "Beginner", "25 hours", "https://aws.amazon.com/training/digital/aws-cloud-practitioner-essentials/"),
-        ("Google UX Design Certificate", "Design thinking and user experience", "Coursera", "Design", "Beginner", "35 hours", "https://www.coursera.org/professional-certificates/google-ux-design"),
-        ("JavaScript Complete Course", "Master JavaScript from beginner to advanced", "freeCodeCamp", "Programming", "Beginner", "50 hours", "https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures/"),
-        ("Data Science with Python", "Complete data science bootcamp", "Kaggle Learn", "Data Science", "Intermediate", "45 hours", "https://www.kaggle.com/learn/python"),
-        ("Git and GitHub Mastery", "Version control and collaboration", "GitHub Skills", "Development Tools", "Beginner", "10 hours", "https://skills.github.com/"),
-        ("HTML & CSS Fundamentals", "Web development basics", "MDN Web Docs", "Frontend", "Beginner", "20 hours", "https://developer.mozilla.org/en-US/docs/Learn"),
-        ("SQL for Data Analysis", "Database querying and analysis", "Khan Academy", "Data Science", "Beginner", "30 hours", "https://www.khanacademy.org/computing/intro-to-sql")
+        ("Python for Beginners", "Complete Python programming course", "CareerLink Academy", "Programming", "Beginner", "40 hours", "#course-coming-soon"),
+        ("Machine Learning Course", "Introduction to ML algorithms and concepts", "CareerLink Academy", "Data Science", "Intermediate", "60 hours", "#course-coming-soon"),
+        ("React Development", "Build modern web applications with React", "CareerLink Academy", "Frontend", "Intermediate", "30 hours", "#course-coming-soon"),
+        ("AWS Cloud Essentials", "Learn cloud computing with AWS", "CareerLink Academy", "Cloud", "Beginner", "25 hours", "#course-coming-soon"),
+        ("UI/UX Design Fundamentals", "Design thinking and user experience", "CareerLink Academy", "Design", "Beginner", "35 hours", "#course-coming-soon")
     ]
     
     c.executemany('INSERT OR IGNORE INTO courses (title, description, provider, skill_category, difficulty_level, duration, url) VALUES (?, ?, ?, ?, ?, ?, ?)', sample_courses)
