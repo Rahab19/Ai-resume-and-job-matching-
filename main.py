@@ -606,6 +606,12 @@ def analyze_cv_text(cv_text):
     
     return feedback
 
+@app.route('/career-growth')
+def career_growth():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    return render_template('career_growth.html')
+
 @app.route('/api/interview-questions')
 def interview_questions():
     if 'user_id' not in session:
