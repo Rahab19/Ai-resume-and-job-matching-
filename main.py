@@ -102,6 +102,20 @@ def init_db():
         )
     ''')
     
+    # Notifications table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS notifications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            title TEXT NOT NULL,
+            message TEXT NOT NULL,
+            type TEXT DEFAULT 'info',
+            is_read BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+    
     conn.commit()
     conn.close()
 
@@ -145,6 +159,17 @@ def insert_sample_data():
     ]
     
     c.executemany('INSERT INTO mentorship (mentor_name, expertise, experience_years, availability, rating, contact_info) VALUES (?, ?, ?, ?, ?, ?)', sample_mentors)
+    
+    # Sample notifications (for demo purposes - in real app, these would be generated dynamically)
+    sample_notifications = [
+        (1, "New Job Match!", "A Software Engineer position at TechCorp matches your profile perfectly", "job", False),
+        (1, "Course Recommendation", "AWS Cloud Essentials course is now available based on your interests", "course", False),
+        (1, "Mentor Response", "Amara Okafor has responded to your mentorship request", "mentor", False),
+        (1, "Career Milestone", "Congratulations! You've completed 3 courses this month", "achievement", True),
+        (1, "New Feature", "CV Assistant now supports PDF uploads for better analysis", "info", True)
+    ]
+    
+    c.executemany('INSERT OR IGNORE INTO notifications (user_id, title, message, type, is_read) VALUES (?, ?, ?, ?, ?)', sample_notifications)
     
     conn.commit()
     conn.close()
@@ -639,6 +664,65 @@ def interview_questions():
     
     questions = questions_db.get(job_role, questions_db['Software Developer'])
     return jsonify({'questions': questions})
+
+@app.route('/api/notifications')
+def get_notifications():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    user_id = session['user_id']
+    
+    conn = sqlite3.connect('careerlink.db')
+    c = conn.cursor()
+    c.execute('SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 10', (user_id,))
+    notifications = c.fetchall()
+    conn.close()
+    
+    notification_list = []
+    for notification in notifications:
+        notification_list.append({
+            'id': notification[0],
+            'user_id': notification[1],
+            'title': notification[2],
+            'message': notification[3],
+            'type': notification[4],
+            'is_read': bool(notification[5]),
+            'created_at': notification[6]
+        })
+    
+    return jsonify({'notifications': notification_list})
+
+@app.route('/api/notifications/mark-read', methods=['POST'])
+def mark_notification_read():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    data = request.json
+    notification_id = data.get('notification_id')
+    user_id = session['user_id']
+    
+    conn = sqlite3.connect('careerlink.db')
+    c = conn.cursor()
+    c.execute('UPDATE notifications SET is_read = TRUE WHERE id = ? AND user_id = ?', (notification_id, user_id))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True})
+
+@app.route('/api/notifications/mark-all-read', methods=['POST'])
+def mark_all_notifications_read():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    user_id = session['user_id']
+    
+    conn = sqlite3.connect('careerlink.db')
+    c = conn.cursor()
+    c.execute('UPDATE notifications SET is_read = TRUE WHERE user_id = ?', (user_id,))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True})
 
 if __name__ == '__main__':
     init_db()

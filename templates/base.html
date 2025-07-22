@@ -34,6 +34,32 @@
                     <p class="text-sm text-purple-200">Welcome back,</p>
                     <p class="font-semibold text-white">{{ session.username }}!</p>
                 </div>
+                
+                <!-- Notifications -->
+                <div class="mb-6">
+                    <button onclick="toggleNotifications()" class="w-full flex items-center justify-between p-3 bg-purple-600 hover:bg-purple-500 rounded-lg transition-colors duration-200">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-bell w-5"></i>
+                            <span>Notifications</span>
+                        </div>
+                        <span id="notification-badge" class="bg-red-500 text-white text-xs px-2 py-1 rounded-full hidden">3</span>
+                    </button>
+                    
+                    <!-- Notifications Dropdown -->
+                    <div id="notifications-dropdown" class="hidden mt-2 bg-white rounded-lg shadow-lg border max-h-80 overflow-y-auto">
+                        <div class="p-3 border-b border-gray-200">
+                            <h3 class="font-semibold text-gray-800">Recent Notifications</h3>
+                        </div>
+                        <div id="notifications-list" class="divide-y divide-gray-100">
+                            <!-- Notifications will be loaded here -->
+                        </div>
+                        <div class="p-3 text-center">
+                            <button onclick="markAllAsRead()" class="text-purple-600 hover:text-purple-800 text-sm font-medium">
+                                Mark all as read
+                            </button>
+                        </div>
+                    </div>
+                </div>
             {% endif %}
 
             <!-- Navigation Links -->
@@ -147,7 +173,7 @@
         </div>
     </footer>
 
-    <!-- JavaScript for sidebar toggle -->
+    <!-- JavaScript for sidebar toggle and notifications -->
     <script>
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -155,6 +181,139 @@
             
             sidebar.classList.toggle('-translate-x-full');
             overlay.classList.toggle('hidden');
+        }
+
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notifications-dropdown');
+            dropdown.classList.toggle('hidden');
+            
+            if (!dropdown.classList.contains('hidden')) {
+                loadNotifications();
+            }
+        }
+
+        function loadNotifications() {
+            fetch('/api/notifications')
+                .then(response => response.json())
+                .then(data => {
+                    const notificationsList = document.getElementById('notifications-list');
+                    const notificationBadge = document.getElementById('notification-badge');
+                    
+                    if (data.notifications && data.notifications.length > 0) {
+                        notificationsList.innerHTML = '';
+                        let unreadCount = 0;
+                        
+                        data.notifications.forEach(notification => {
+                            if (!notification.is_read) unreadCount++;
+                            
+                            const notificationElement = document.createElement('div');
+                            notificationElement.className = `p-3 hover:bg-gray-50 cursor-pointer ${!notification.is_read ? 'bg-blue-50' : ''}`;
+                            notificationElement.onclick = () => markAsRead(notification.id);
+                            
+                            const typeIcon = getNotificationIcon(notification.type);
+                            const timeAgo = getTimeAgo(notification.created_at);
+                            
+                            notificationElement.innerHTML = `
+                                <div class="flex items-start space-x-3">
+                                    <div class="flex-shrink-0">
+                                        <i class="${typeIcon} text-lg ${getNotificationColor(notification.type)}"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-medium text-gray-900">${notification.title}</p>
+                                        <p class="text-xs text-gray-600">${notification.message}</p>
+                                        <p class="text-xs text-gray-400 mt-1">${timeAgo}</p>
+                                    </div>
+                                    ${!notification.is_read ? '<div class="w-2 h-2 bg-blue-600 rounded-full"></div>' : ''}
+                                </div>
+                            `;
+                            
+                            notificationsList.appendChild(notificationElement);
+                        });
+                        
+                        if (unreadCount > 0) {
+                            notificationBadge.textContent = unreadCount;
+                            notificationBadge.classList.remove('hidden');
+                        } else {
+                            notificationBadge.classList.add('hidden');
+                        }
+                    } else {
+                        notificationsList.innerHTML = '<div class="p-3 text-center text-gray-500 text-sm">No notifications</div>';
+                        notificationBadge.classList.add('hidden');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading notifications:', error);
+                });
+        }
+
+        function getNotificationIcon(type) {
+            const icons = {
+                'job': 'fas fa-briefcase',
+                'course': 'fas fa-graduation-cap',
+                'mentor': 'fas fa-users',
+                'achievement': 'fas fa-trophy',
+                'info': 'fas fa-info-circle'
+            };
+            return icons[type] || 'fas fa-bell';
+        }
+
+        function getNotificationColor(type) {
+            const colors = {
+                'job': 'text-purple-600',
+                'course': 'text-teal-600',
+                'mentor': 'text-emerald-600',
+                'achievement': 'text-yellow-600',
+                'info': 'text-blue-600'
+            };
+            return colors[type] || 'text-gray-600';
+        }
+
+        function getTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            
+            if (diffInSeconds < 60) return 'Just now';
+            if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+            if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+            return `${Math.floor(diffInSeconds / 86400)}d ago`;
+        }
+
+        function markAsRead(notificationId) {
+            fetch('/api/notifications/mark-read', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ notification_id: notificationId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadNotifications();
+                }
+            })
+            .catch(error => {
+                console.error('Error marking notification as read:', error);
+            });
+        }
+
+        function markAllAsRead() {
+            fetch('/api/notifications/mark-all-read', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadNotifications();
+                }
+            })
+            .catch(error => {
+                console.error('Error marking all notifications as read:', error);
+            });
         }
 
         // Close sidebar when clicking on a link (mobile)
@@ -167,6 +326,21 @@
                     }
                 });
             });
+
+            // Load notifications on page load
+            if (document.getElementById('notification-badge')) {
+                loadNotifications();
+            }
+        });
+
+        // Close notifications dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('notifications-dropdown');
+            const button = event.target.closest('button[onclick="toggleNotifications()"]');
+            
+            if (!button && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
         });
     </script>
 </body>
