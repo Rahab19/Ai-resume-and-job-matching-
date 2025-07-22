@@ -123,6 +123,9 @@ def insert_sample_data():
     
     # Sample courses with working educational links
     sample_courses = [
+        ("Python for Beginners", "Complete Python programming course", "freeCodeCamp", "Programming", "Beginner", "40 hours", "https://www.freecodecamp.org/learn/scientific-computing-with-python/"),
+        ("Machine Learning Course", "Introduction to ML algorithms and concepts", "Khan Academy", "Data Science", "Intermediate", "60 hours", "https://www.khanacademy.org/computing/ap-computer-science-principles"),
+        ("React Development", "Build modern web applications with React", "React Official", "Frontend", "Intermediate", "30 hours", "https://react.dev/learn"),
         ("AWS Cloud Essentials", "Learn cloud computing fundamentals", "AWS Free Tier", "Cloud", "Beginner", "25 hours", "https://aws.amazon.com/free/"),
         ("UI/UX Design Fundamentals", "Design thinking and user experience", "Google Design", "Design", "Beginner", "35 hours", "https://design.google/")
     ]
