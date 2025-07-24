@@ -13,6 +13,7 @@ filelock==3.18.0
 Flask==3.1.1
 frozenlist==1.7.0
 fsspec==2025.7.0
+gunicorn==23.0.0
 hf-xet==1.1.5
 huggingface-hub==0.33.4
 idna==3.10
